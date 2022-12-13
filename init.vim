@@ -31,10 +31,20 @@ else
     set guifont=Hack\ Regular\ Nerd\ Font\ Complete\ 10
 
     let mapleader = " "
+    " telescope
     nnoremap <leader>f :Telescope find_files<CR>
+
+    " tree
     nnoremap <leader>e :NvimTreeToggle<CR>
+
+    " Terminal
     nnoremap <leader>t :ToggleTerm direction=float<CR>
+
+    " COC
     nnoremap <leader>qf <Plug>(coc-fix-current)
-    "nnoremap <leader>c gcc<CR>
-    "
+    nnoremap <leader>d :<C-u>CocList diagnostics<CR>
+    nnoremap <leader>ac  <Plug>(coc-codeaction-cursor)
+    nnoremap <leader>gd  <Plug>(coc-definition)
+    nnoremap <leader>gt  <Plug>(coc-type-definition)
+    nnoremap <leader>re <Plug>(coc-codeaction-refactor)   
 endif
