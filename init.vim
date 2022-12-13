@@ -1,5 +1,8 @@
 if exists('g:vscode')
-    "Porcaria nenhuma
+    set nu
+    set nohlsearch
+    set tabstop=4 softtabstop=4
+    set shiftwidth=4
 else
     source $HOME/.config/nvim/vim-plug/plugins.vim
 
