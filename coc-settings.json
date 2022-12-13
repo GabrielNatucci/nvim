@@ -1,0 +1,6 @@
+{
+    "html.format.templating": true,
+    "html.completion.attributeDefaultValue": "singlequotes",
+    "snippets.ultisnips.pythonPrompt": false,
+    // codelens
+}
