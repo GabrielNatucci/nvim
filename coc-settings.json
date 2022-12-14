@@ -3,4 +3,6 @@
     "html.completion.attributeDefaultValue": "singlequotes",
     "snippets.ultisnips.pythonPrompt": false,
     // codelens
+    "codeLens.enable": true,
+    "java.referencesCodeLens.enabled": true,
 }
