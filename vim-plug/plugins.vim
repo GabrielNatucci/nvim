@@ -1,14 +1,16 @@
 call plug#begin()
     " theme
     Plug 'folke/tokyonight.nvim'
+    Plug 'LunarVim/lunar.nvim'
 
     " auto pairs
     Plug 'jiangmiao/auto-pairs'
     
     " completion - lsp
-    Plug 'hrsh7th/cmp-vsnip'
-    Plug 'hrsh7th/vim-vsnip'
-    Plug 'hrsh7th/vim-vsnip-integ'
+    Plug 'L3MON4D3/LuaSnip'
+    Plug 'saadparwaiz1/cmp_luasnip'
+    Plug 'rafamadriz/friendly-snippets'
+
     Plug 'hrsh7th/cmp-nvim-lsp'
     Plug 'hrsh7th/cmp-buffer'
     Plug 'hrsh7th/cmp-path'
@@ -88,7 +90,7 @@ lua <<EOF
     cmp.setup({
         snippet = {
             expand = function(args)
-                vim.fn["vsnip#anonymous"](args.body)
+                require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
             end,
         },
         window = {
@@ -105,7 +107,7 @@ lua <<EOF
         }),
         sources = cmp.config.sources({
             { name = 'nvim_lsp' },
-            { name = 'vsnip' },
+            { name = 'luasnip' }, -- For luasnip users.
         }, {
             { name = 'buffer' },
         })
@@ -134,6 +136,8 @@ lua <<EOF
             { name = 'cmdline' }
         })
     })
+    ---------------------------------- FRIENDLY-SNIPPETS ---------------------------------
+    require("luasnip/loaders/from_vscode").lazy_load();
 
     ------------------------------------ Indent Lines ------------------------------------
     require("indent_blankline").setup {
