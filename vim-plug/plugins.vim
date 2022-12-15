@@ -30,6 +30,7 @@ call plug#begin()
     Plug 'tamago324/lir.nvim'
     Plug 'nvim-lua/plenary.nvim'
     Plug 'kyazdani42/nvim-web-devicons'
+    Plug 'cappyzawa/trim.nvim'
     
     " telescope
     Plug 'nvim-telescope/telescope.nvim'
@@ -344,4 +345,15 @@ lua <<EOF
         inactive_winbar = {},
         extensions = {}
     }
+
+    ----------------------------------- LUA LINE -----------------------------------
+    require('trim').setup({
+        -- if you want to ignore markdown file.
+        -- you can specify filetypes.
+        disable = {},
+        -- if you want to remove multiple blank lines
+        patterns = {
+            [[%s/\(\n\n\)\n\+/\1/]],   -- replace multiple blank lines with a single line
+        },
+    })
 EOF
