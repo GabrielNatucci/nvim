@@ -5,7 +5,6 @@ if exists('g:vscode')
     set shiftwidth=4
 else
     source $HOME/.config/nvim/vim-plug/plugins.vim
-
     set exrc
     set relativenumber
     set nu
@@ -27,10 +26,11 @@ else
 
     colorscheme tokyonight-storm
 
-    "set guifont=Ubuntu\ Nerd\ Font\ Complete\ 10
     set guifont=Hack\ Regular\ Nerd\ Font\ Complete\ 10
-
+    
+    " atalhos
     let mapleader = " "
+
     " telescope
     nnoremap <leader>f :Telescope find_files<CR>
 
@@ -39,12 +39,4 @@ else
 
     " Terminal
     nnoremap <leader>t :ToggleTerm direction=float<CR>
-
-    " COC
-    nnoremap <leader>qf <Plug>(coc-fix-current)
-    nnoremap <leader>d :<C-u>CocList diagnostics<CR>
-    nnoremap <leader>ac  <Plug>(coc-codeaction-cursor)
-    nnoremap <leader>gd  <Plug>(coc-definition)
-    nnoremap <leader>gt  <Plug>(coc-type-definition)
-    nnoremap <leader>re <Plug>(coc-codeaction-refactor)   
 endif
