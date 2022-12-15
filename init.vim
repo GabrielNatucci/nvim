@@ -25,7 +25,7 @@ else
     set encoding=UTF-8
     set signcolumn=yes
 
-    colorscheme tokyonight-moon
+    colorscheme tokyonight-storm
 
     "set guifont=Ubuntu\ Nerd\ Font\ Complete\ 10
     set guifont=Hack\ Regular\ Nerd\ Font\ Complete\ 10

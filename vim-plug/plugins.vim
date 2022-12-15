@@ -5,12 +5,23 @@ call plug#begin()
     " auto pairs
     Plug 'jiangmiao/auto-pairs'
     
-    " coc
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
+    " completion - lsp
+    Plug 'hrsh7th/cmp-vsnip'
+    Plug 'hrsh7th/vim-vsnip'
+    Plug 'hrsh7th/vim-vsnip-integ'
+    Plug 'hrsh7th/cmp-nvim-lsp'
+    Plug 'hrsh7th/cmp-buffer'
+    Plug 'hrsh7th/cmp-path'
+    Plug 'hrsh7th/cmp-cmdline'
+    Plug 'hrsh7th/nvim-cmp'
+    Plug 'williamboman/mason.nvim'
+    Plug 'williamboman/mason-lspconfig.nvim'
+    Plug 'neovim/nvim-lspconfig'
+    
     " debug
     Plug 'mfussenegger/nvim-dap'
-	
+
+    "utils
     Plug 'mg979/vim-visual-multi', {'branch': 'master'}
     Plug 'numToStr/Comment.nvim'
     Plug 'tamago324/lir.nvim'
@@ -34,115 +45,106 @@ call plug#begin()
     
     "Image viewer
     Plug 'edluffy/hologram.nvim'
+    
+    "Lua Line
+    Plug 'nvim-lualine/lualine.nvim'
 call plug#end()
 
 lua <<EOF
-    ------------------------------------ COC -------------------------------------
-    -- Some servers have issues with backup files, see #649
-    vim.opt.backup = false
-    vim.opt.writebackup = false
+    ---------------------------------------- MASON ---------------------------------------
+    local lsp_config = require("lspconfig")
+    local cmp = require("cmp")
 
-    -- Having longer updatetime (default is 4000 ms = 4s) leads to noticeable
-    -- delays and poor user experience
-    vim.opt.updatetime = 300
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-    -- Always show the signcolumn, otherwise it would shift the text each time
-    -- diagnostics appeared/became resolved
-    vim.opt.signcolumn = "yes"
-
-    local keyset = vim.keymap.set
-    -- Autocomplete
-    function _G.check_back_space()
-        local col = vim.fn.col('.') - 1
-        return col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') ~= nil
-    end
-
-    -- Use Tab for trigger completion with characters ahead and navigate
-    -- NOTE: There's always a completion item selected by default, you may want to enable
-    -- no select by setting `"suggest.noselect": true` in your configuration file
-    -- NOTE: Use command ':verbose imap <tab>' to make sure Tab is not mapped by
-    -- other plugins before putting this into your config
-    local opts = {silent = true, noremap = true, expr = true, replace_keycodes = false}
-    keyset("i", "<TAB>", 'coc#pum#visible() ? coc#pum#next(1) : v:lua.check_back_space() ? "<TAB>" : coc#refresh()', opts)
-    keyset("i", "<S-TAB>", [[coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"]], opts)
-
-    -- Make <CR> to accept selected completion item or notify coc.nvim to format
-    -- <C-g>u breaks current undo, please make your own choice
-    keyset("i", "<cr>", [[coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"]], opts)
-
-    -- Use <c-j> to trigger snippets
-    keyset("i", "<c-j>", "<Plug>(coc-snippets-expand-jump)")
-    -- Use <c-space> to trigger completion
-    keyset("i", "<c-space>", "coc#refresh()", {silent = true, expr = true})
-
-    -- Use K to show documentation in preview window
-    function _G.show_docs()
-        local cw = vim.fn.expand('<cword>')
-        if vim.fn.index({'vim', 'help'}, vim.bo.filetype) >= 0 then
-            vim.api.nvim_command('h ' .. cw)
-        elseif vim.api.nvim_eval('coc#rpc#ready()') then
-            vim.fn.CocActionAsync('doHover')
-        else
-            vim.api.nvim_command('!' .. vim.o.keywordprg .. ' ' .. cw)
+    local general_on_attach = function(client, bufnr)
+        if client.server_capabilities.completion then
+            cmp.on_attach(client, bufnr)
         end
     end
-    keyset("n", "K", '<CMD>lua _G.show_docs()<CR>', {silent = true})
 
-
-    -- Highlight the symbol and its references on a CursorHold event(cursor is idle)
-    vim.api.nvim_create_augroup("CocGroup", {})
-    vim.api.nvim_create_autocmd("CursorHold", {
-        group = "CocGroup",
-        command = "silent call CocActionAsync('highlight')",
-        desc = "Highlight symbol under cursor on CursorHold"
+    require("mason").setup({
+        ui = {
+            icons = {
+                package_installed = "✓",
+                package_pending = "➜",
+                package_uninstalled = "✗"
+            }
+        }
     })
 
-    -- Symbol renaming
-    keyset("n", "<leader>rn", "<Plug>(coc-rename)", {silent = true})
+    require("mason-lspconfig").setup()
+    require("mason-lspconfig").setup_handlers {
+        function (server_name) -- default handler (optional)
+            require("lspconfig")[server_name].setup {
+                capabilities = capabilities,
+                on_attach = general_on_attach
+            }
+        end,
+    }
 
-    -- Setup formatexpr specified filetype(s)
-    vim.api.nvim_create_autocmd("FileType", {
-        group = "CocGroup",
-        pattern = "typescript,json",
-        command = "setl formatexpr=CocAction('formatSelected')",
-        desc = "Setup formatexpr specified filetype(s)."
+    ------------------------------------- COMPLETION - CMP -------------------------------------
+    cmp.setup({
+        snippet = {
+            expand = function(args)
+                vim.fn["vsnip#anonymous"](args.body)
+            end,
+        },
+        window = {
+        },
+        mapping = cmp.mapping.preset.insert({
+            ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+            ['<C-f>'] = cmp.mapping.scroll_docs(4),
+            ['<C-Space>'] = cmp.mapping.complete(),
+            ['<C-e>'] = cmp.mapping.abort(),
+            ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+            ["<Down>"] = cmp.mapping(cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Select }, { "i" }),
+            ["<tab>"] = cmp.mapping(cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Select }, { "i" }),
+            ["<Up>"] = cmp.mapping(cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Select }, { "i" }),
+        }),
+        sources = cmp.config.sources({
+            { name = 'nvim_lsp' },
+            { name = 'vsnip' },
+        }, {
+            { name = 'buffer' },
+        })
     })
 
-    -- Update signature help on jump placeholder
-    vim.api.nvim_create_autocmd("User", {
-        group = "CocGroup",
-        pattern = "CocJumpPlaceholder",
-        command = "call CocActionAsync('showSignatureHelp')",
-        desc = "Update signature help on jump placeholder"
+    cmp.setup.filetype('gitcommit', {
+        sources = cmp.config.sources({
+            { name = 'cmp_git' }, 
+        }, {
+            { name = 'buffer' },
+        })
+    })
+
+    cmp.setup.cmdline({ '/', '?' }, {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = {
+            { name = 'buffer' }
+        }
+    })
+
+    cmp.setup.cmdline(':', {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = cmp.config.sources({
+            { name = 'path' }
+        }, {
+            { name = 'cmdline' }
+        })
     })
 
     ------------------------------------ Indent Lines ------------------------------------
     require("indent_blankline").setup {
-        -- for example, context is off by default, use this to turn it on
         show_current_context = true,
         show_current_context_start = true,
     }
-
-    ------------------------------------ TREE SITTER ------------------------------------
+    ------------------------------------ TREE SITTER -------------------------------------
     require'nvim-treesitter.configs'.setup {
-        -- A list of parser names, or "all"
-        -- Install parsers synchronously (only applied to `ensure_installed`)
-        -- Automatically install missing parsers when entering buffer
-        -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
         auto_install = true,
-        -- List of parsers to ignore installing (for "all")
-        -- ignore_install = { "javascript" },
-        ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-        -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
         highlight = {
-            -- `false` will disable the whole extension
             enable = true,
-            -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
-            -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
-            -- the name of the parser)
-            -- list of language that will be disabled
-            -- disable = { "c", "rust" },
-            -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
             disable = function(lang, buf)
                 local max_filesize = 100 * 1024 -- 100 KB
                 local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
@@ -150,10 +152,6 @@ lua <<EOF
                     return true
                 end
             end,
-            -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-            -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-            -- Using this option may slow down your editor, and you may see some duplicate highlights.
-            -- Instead of true it can also be a list of languages
             additional_vim_regex_highlighting = false,
         },
     }
@@ -224,79 +222,60 @@ lua <<EOF
     local clipboard_actions = require'lir.clipboard.actions'
 
     require'lir'.setup {
-      show_hidden_files = false,
-      devicons_enable = true,
-      mappings = {
-        ['l']     = actions.edit,
-        ['<C-s>'] = actions.split,
-        ['<C-v>'] = actions.vsplit,
-        ['<C-t>'] = actions.tabedit,
+        show_hidden_files = false,
+        devicons_enable = true,
+        mappings = {
+            ['l']     = actions.edit,
+            ['<C-s>'] = actions.split,
+            ['<C-v>'] = actions.vsplit,
+            ['<C-t>'] = actions.tabedit,
 
-        ['h']     = actions.up,
-        ['q']     = actions.quit,
+            ['h']     = actions.up,
+            ['q']     = actions.quit,
 
-        ['K']     = actions.mkdir,
-        ['N']     = actions.newfile,
-        ['R']     = actions.rename,
-        ['@']     = actions.cd,
-        ['Y']     = actions.yank_path,
-        ['.']     = actions.toggle_show_hidden,
-        ['D']     = actions.delete,
+            ['K']     = actions.mkdir,
+            ['N']     = actions.newfile,
+            ['R']     = actions.rename,
+            ['@']     = actions.cd,
+            ['Y']     = actions.yank_path,
+            ['.']     = actions.toggle_show_hidden,
+            ['D']     = actions.delete,
 
-        ['J'] = function()
-          mark_actions.toggle_mark()
-          vim.cmd('normal! j')
-        end,
-        ['C'] = clipboard_actions.copy,
-        ['X'] = clipboard_actions.cut,
-        ['P'] = clipboard_actions.paste,
-      },
-      float = {
-        winblend = 0,
-        curdir_window = {
-          enable = false,
-          highlight_dirname = false
+            ['J'] = function()
+              mark_actions.toggle_mark()
+              vim.cmd('normal! j')
+            end,
+            ['C'] = clipboard_actions.copy,
+            ['X'] = clipboard_actions.cut,
+            ['P'] = clipboard_actions.paste,
         },
+        float = {
+            winblend = 0,
+            curdir_window = {
+                enable = false,
+                highlight_dirname = false
+            },
+        },
+        hide_cursor = true,
+        on_init = function()
+            vim.api.nvim_buf_set_keymap(
+                0,
+                "x",
+                "J",
+                ':<C-u>lua require"lir.mark.actions".toggle_mark("v")<CR>',
+                { noremap = true, silent = true }
+            )
 
-        -- -- You can define a function that returns a table to be passed as the third
-        -- -- argument of nvim_open_win().
-        -- win_opts = function()
-        --   local width = math.floor(vim.o.columns * 0.8)
-        --   local height = math.floor(vim.o.lines * 0.8)
-        --   return {
-        --     border = {
-        --       "+", "─", "+", "│", "+", "─", "+", "│",
-        --     },
-        --     width = width,
-        --     height = height,
-        --     row = 1,
-        --     col = math.floor((vim.o.columns - width) / 2),
-        --   }
-        -- end,
-      },
-      hide_cursor = true,
-      on_init = function()
-        -- use visual mode
-        vim.api.nvim_buf_set_keymap(
-          0,
-          "x",
-          "J",
-          ':<C-u>lua require"lir.mark.actions".toggle_mark("v")<CR>',
-          { noremap = true, silent = true }
-        )
-
-        -- echo cwd
-        vim.api.nvim_echo({ { vim.fn.expand("%:p"), "Normal" } }, false, {})
-      end,
+            vim.api.nvim_echo({ { vim.fn.expand("%:p"), "Normal" } }, false, {})
+        end,
     }
 
-    -- custom folder icon
     require'nvim-web-devicons'.set_icon({
-      lir_folder_icon = {
-        icon = "",
-        color = "#7ebae4",
-        name = "LirFolderNode"
-      }
+        lir_folder_icon = {
+            icon = "",
+            color = "#7ebae4",
+            name = "LirFolderNode"
+        }
     })
 
     ----------------------------------- Image Viwer/hologram -----------------------------------
@@ -304,4 +283,46 @@ lua <<EOF
         auto_display = true -- WIP automatic markdown image display, may be prone to breaking
     }
 
+    ----------------------------------- LUA LINE -----------------------------------
+    require('lualine').setup {
+        options = {
+            icons_enabled = true,
+            theme = 'auto',
+            component_separators = { left = '', right = ''},
+            section_separators = { left = '', right = ''},
+            disabled_filetypes = {
+                statusline = {},
+                winbar = {},
+            },
+            ignore_focus = {},
+            always_divide_middle = true,
+            globalstatus = false,
+            refresh = {
+                statusline = 1000,
+                tabline = 1000,
+                winbar = 1000,
+            }
+        },
+        sections = {
+            lualine_a = {'mode'},
+            lualine_b = {'branch', 'diff', 'diagnostics'},
+            lualine_c = {'filename'},
+            lualine_c = {'filename'},
+            lualine_x = {'encoding', 'fileformat', 'filetype'},
+            lualine_y = {'progress'},
+            lualine_z = {'location'}
+        },
+        inactive_sections = {
+            lualine_a = {},
+            lualine_b = {},
+            lualine_c = {'filename'},
+            lualine_x = {'location'},
+            lualine_y = {},
+            lualine_z = {}
+        },
+        tabline = {},
+        winbar = {},
+        inactive_winbar = {},
+        extensions = {}
+    }
 EOF
