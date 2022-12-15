@@ -6,7 +6,7 @@ call plug#begin()
 
     " auto pairs
     Plug 'jiangmiao/auto-pairs'
-    
+
     " completion - lsp
     Plug 'L3MON4D3/LuaSnip'
     Plug 'saadparwaiz1/cmp_luasnip'
@@ -20,7 +20,7 @@ call plug#begin()
     Plug 'williamboman/mason.nvim'
     Plug 'williamboman/mason-lspconfig.nvim'
     Plug 'neovim/nvim-lspconfig'
-    
+
     " debug
     Plug 'mfussenegger/nvim-dap'
 
@@ -31,25 +31,25 @@ call plug#begin()
     Plug 'nvim-lua/plenary.nvim'
     Plug 'kyazdani42/nvim-web-devicons'
     Plug 'cappyzawa/trim.nvim'
-    
+
     " telescope
     Plug 'nvim-telescope/telescope.nvim'
-    
+
     " nvim tree
     Plug 'kyazdani42/nvim-tree.lua'
-    
+
     " treesitter
     Plug 'nvim-treesitter/nvim-treesitter'
-    
+
     "terminal
     Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 
     "Indent Lines
     Plug 'lukas-reineke/indent-blankline.nvim'
-    
+
     "Image viewer
     Plug 'edluffy/hologram.nvim'
-    
+
     "Lua Line
     Plug 'nvim-lualine/lualine.nvim'
 call plug#end()
@@ -97,7 +97,7 @@ lua <<EOF
         function (server_name) -- default handler (optional)
             require("lspconfig")[server_name].setup {
                 capabilities = capabilities,
-                on_attach = general_on_attach
+                on_attach = general_on_attach,
             }
         end,
     }
@@ -131,7 +131,7 @@ lua <<EOF
 
     cmp.setup.filetype('gitcommit', {
         sources = cmp.config.sources({
-            { name = 'cmp_git' }, 
+            { name = 'cmp_git' },
         }, {
             { name = 'buffer' },
         })
