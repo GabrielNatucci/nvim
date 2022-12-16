@@ -152,6 +152,7 @@ lua <<EOF
             { name = 'cmdline' }
         })
     })
+
     ---------------------------------- FRIENDLY-SNIPPETS ---------------------------------
     require("luasnip/loaders/from_vscode").lazy_load();
 

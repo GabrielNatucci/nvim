@@ -39,4 +39,6 @@ else
 
     " Terminal
     nnoremap <leader>t :ToggleTerm direction=float<CR>
+    nnoremap <leader>ht :ToggleTerm direction=horizontal<CR>
+    tnoremap <Esc> <C-\><C-n>
 endif
