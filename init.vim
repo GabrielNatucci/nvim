@@ -10,7 +10,7 @@ else
     set nu
     set nohlsearch
     set hidden
-    set noerrorbells 
+    set noerrorbells
     set tabstop=4 softtabstop=4
     set shiftwidth=4
     set expandtab
@@ -24,10 +24,10 @@ else
     set encoding=UTF-8
     set signcolumn=yes
 
-    colorscheme tokyonight-storm
+    colorscheme lunar
 
     set guifont=Hack\ Regular\ Nerd\ Font\ Complete\ 10
-    
+
     " atalhos
     let mapleader = " "
 
@@ -40,5 +40,5 @@ else
     " Terminal
     nnoremap <leader>t :ToggleTerm direction=float<CR>
     nnoremap <leader>ht :ToggleTerm direction=horizontal<CR>
-    tnoremap <Esc> <C-\><C-n>
+    :tnoremap <Esc> <C-\><C-n>
 endif
