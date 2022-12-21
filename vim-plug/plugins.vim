@@ -3,6 +3,7 @@ call plug#begin()
     Plug 'folke/tokyonight.nvim'
     Plug 'LunarVim/lunar.nvim'
     Plug 'projekt0n/github-nvim-theme'
+    Plug 'joshdick/onedark.vim'
 
     " auto pairs
     Plug 'jiangmiao/auto-pairs'
@@ -26,7 +27,7 @@ call plug#begin()
 
     "utils
     Plug 'mg979/vim-visual-multi', {'branch': 'master'}
-    Plug 'numToStr/Comment.nvim'
+    Plug 'tpope/vim-commentary'
     Plug 'tamago324/lir.nvim'
     Plug 'nvim-lua/plenary.nvim'
     Plug 'kyazdani42/nvim-web-devicons'
@@ -47,18 +48,18 @@ call plug#begin()
     "Indent Lines
     Plug 'lukas-reineke/indent-blankline.nvim'
 
-    "Image viewer
-    Plug 'edluffy/hologram.nvim'
-
     "Lua Line
     Plug 'nvim-lualine/lualine.nvim'
+
+    "which key
+    Plug 'folke/which-key.nvim'
 call plug#end()
 
 lua <<EOF
     ---------------------------------------- MASON ---------------------------------------
     local lsp_config = require("lspconfig")
     local cmp = require("cmp")
-
+    local root_pattern = require'lspconfig'.util.root_pattern
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
 
@@ -98,6 +99,7 @@ lua <<EOF
             require("lspconfig")[server_name].setup {
                 capabilities = capabilities,
                 on_attach = general_on_attach,
+                root_dir = root_pattern('.git'),
             }
         end,
     }
@@ -130,43 +132,50 @@ lua <<EOF
         Operator = "",
         TypeParameter = "",
     }
+
     cmp.setup({
-        snippet = {
-            expand = function(args)
-                require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-            end,
+    snippet = {
+        expand = function(args)
+            require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+        end,
         },
         window = {
             completion = cmp.config.window.bordered(),
             documentation = cmp.config.window.bordered(),
         },
+        {
+            name = 'path',
+            option = {
+                trailing_slash = true,
+            },
+        },
         mapping = cmp.mapping.preset.insert({
-            ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-            ['<C-f>'] = cmp.mapping.scroll_docs(4),
-            ['<C-Space>'] = cmp.mapping.complete(),
-            ['<C-e>'] = cmp.mapping.abort(),
-            ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-            ["<Down>"] = cmp.mapping(cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Select }, { "i" }),
-            ["<tab>"] = cmp.mapping(cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Select }, { "i" }),
-            ["<Up>"] = cmp.mapping(cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Select }, { "i" }),
+        ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+        ['<C-f>'] = cmp.mapping.scroll_docs(4),
+        ['<C-Space>'] = cmp.mapping.complete(),
+        ['<C-e>'] = cmp.mapping.abort(),
+        ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+        ["<Down>"] = cmp.mapping(cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Select }, { "i" }),
+        ["<tab>"] = cmp.mapping(cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Select }, { "i" }),
+        ["<Up>"] = cmp.mapping(cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Select }, { "i" }),
         }),
         formatting = {
             fields = { "kind", "abbr", "menu" },
             format = function(entry, vim_item)
-                vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
-                vim_item.menu = ({
-                  luasnip = "[Snippet]",
-                  buffer = "[Buffer]",
-                  path = "[Path]",
-                })[entry.source.name]
-                return vim_item
+            vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
+            vim_item.menu = ({
+            luasnip = "[Snippet]",
+            buffer = "[Buffer]",
+            path = "[Path]",
+            })[entry.source.name]
+            return vim_item
             end,
-        },
+            },
         sources = cmp.config.sources({
             { name = 'nvim_lsp' },
             { name = 'luasnip' }, -- For luasnip users.
-        }, {
-            { name = 'buffer' },
+            }, {
+                { name = 'buffer' },
         })
     })
 
@@ -340,11 +349,6 @@ lua <<EOF
         }
     })
 
-    ----------------------------------- Image Viwer/hologram -----------------------------------
-    require('hologram').setup{
-        auto_display = true -- WIP automatic markdown image display, may be prone to breaking
-    }
-
     ----------------------------------- LUA LINE -----------------------------------
     require('lualine').setup {
         options = {
@@ -388,7 +392,7 @@ lua <<EOF
         extensions = {}
     }
 
-    ----------------------------------- LUA LINE -----------------------------------
+    ----------------------------------- TRIM -----------------------------------
     require('trim').setup({
         -- if you want to ignore markdown file.
         -- you can specify filetypes.
@@ -399,6 +403,36 @@ lua <<EOF
         },
     })
 
-    ----------------------------------- COMMENTS -----------------------------------
-    require('Comment').setup()
+    ----------------------------------- whichkey -----------------------------------
+    require("which-key").setup {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    }
+
+    ----------------------------------- dap -----------------------------------
+    local dap = require'dap'
+    dap.adapters.cpp = {
+        type = 'executable',
+        command = 'lldb-vscode',
+        env = {
+            LLDB_LAUNCH_FLAG_LAUNCH_IN_TTY = "YES"
+        },
+        name = "lldb"
+    }
+
+    dap.configurations.cpp = {
+        {
+            name = "Launch",
+            type = "cpp",
+            request = "launch",
+            program = function()
+                return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+            end,
+            cwd = '${workspaceFolder}',
+            args = {}
+        }
+    }
+    dap.configurations.c = dap.configurations.cpp
+
 EOF
