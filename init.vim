@@ -1,19 +1,17 @@
+set guicursor=i:block
+set nu
+set nohlsearch
+set tabstop=4 softtabstop=4
+set shiftwidth=4
+
 if exists('g:vscode')
     source $HOME/.config/nvim/vscode/vscode.vim
-    set nu
-    set nohlsearch
-    set tabstop=4 softtabstop=4
-    set shiftwidth=4
 else
     source $HOME/.config/nvim/vim-plug/plugins.vim
     set exrc
     set relativenumber
-    set nu
-    set nohlsearch
     set hidden
     set noerrorbells
-    set tabstop=4 softtabstop=4
-    set shiftwidth=4
     set expandtab
     set smartindent
     set nowrap
