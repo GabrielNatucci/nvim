@@ -4,6 +4,7 @@ call plug#begin()
     Plug 'LunarVim/lunar.nvim'
     Plug 'projekt0n/github-nvim-theme'
     Plug 'joshdick/onedark.vim'
+    Plug 'xiyaowong/nvim-transparent'
 
     " auto pairs
     Plug 'jiangmiao/auto-pairs'
@@ -21,6 +22,7 @@ call plug#begin()
     Plug 'williamboman/mason.nvim'
     Plug 'williamboman/mason-lspconfig.nvim'
     Plug 'neovim/nvim-lspconfig'
+    Plug 'mfussenegger/nvim-jdtls'
 
     " debug
     Plug 'mfussenegger/nvim-dap'
@@ -28,7 +30,6 @@ call plug#begin()
     "utils
     Plug 'mg979/vim-visual-multi', {'branch': 'master'}
     Plug 'tpope/vim-commentary'
-    Plug 'tamago324/lir.nvim'
     Plug 'nvim-lua/plenary.nvim'
     Plug 'kyazdani42/nvim-web-devicons'
     Plug 'cappyzawa/trim.nvim'
@@ -61,7 +62,6 @@ lua <<EOF
     local cmp = require("cmp")
     local root_pattern = require'lspconfig'.util.root_pattern
     local capabilities = vim.lsp.protocol.make_client_capabilities()
-    capabilities.textDocument.completion.completionItem.snippetSupport = true
 
     local general_on_attach = function(client, bufnr)
         if client.server_capabilities.completion then
@@ -287,68 +287,6 @@ lua <<EOF
     ------------------------------------ TERMINAL -------------------------------------
     require("toggleterm").setup{}
 
-    ----------------------------------- lir -----------------------------------
-    local actions = require'lir.actions'
-    local mark_actions = require 'lir.mark.actions'
-    local clipboard_actions = require'lir.clipboard.actions'
-
-    require'lir'.setup {
-        show_hidden_files = false,
-        devicons_enable = true,
-        mappings = {
-            ['l']     = actions.edit,
-            ['<C-s>'] = actions.split,
-            ['<C-v>'] = actions.vsplit,
-            ['<C-t>'] = actions.tabedit,
-
-            ['h']     = actions.up,
-            ['q']     = actions.quit,
-
-            ['K']     = actions.mkdir,
-            ['N']     = actions.newfile,
-            ['R']     = actions.rename,
-            ['@']     = actions.cd,
-            ['Y']     = actions.yank_path,
-            ['.']     = actions.toggle_show_hidden,
-            ['D']     = actions.delete,
-
-            ['J'] = function()
-              mark_actions.toggle_mark()
-              vim.cmd('normal! j')
-            end,
-            ['C'] = clipboard_actions.copy,
-            ['X'] = clipboard_actions.cut,
-            ['P'] = clipboard_actions.paste,
-        },
-        float = {
-            winblend = 0,
-            curdir_window = {
-                enable = false,
-                highlight_dirname = false
-            },
-        },
-        hide_cursor = true,
-        on_init = function()
-            vim.api.nvim_buf_set_keymap(
-                0,
-                "x",
-                "J",
-                ':<C-u>lua require"lir.mark.actions".toggle_mark("v")<CR>',
-                { noremap = true, silent = true }
-            )
-
-            vim.api.nvim_echo({ { vim.fn.expand("%:p"), "Normal" } }, false, {})
-        end,
-    }
-
-    require'nvim-web-devicons'.set_icon({
-        lir_folder_icon = {
-            icon = "",
-            color = "#7ebae4",
-            name = "LirFolderNode"
-        }
-    })
-
     ----------------------------------- LUA LINE -----------------------------------
     require('lualine').setup {
         options = {
@@ -403,14 +341,14 @@ lua <<EOF
         },
     })
 
-    ----------------------------------- whichkey -----------------------------------
+    ----------------------------------- WHICHKEY -----------------------------------
     require("which-key").setup {
       -- your configuration comes here
       -- or leave it empty to use the default settings
       -- refer to the configuration section below
     }
 
-    ----------------------------------- dap -----------------------------------
+    ----------------------------------- DAP -----------------------------------
     local dap = require'dap'
     dap.adapters.cpp = {
         type = 'executable',
@@ -435,4 +373,17 @@ lua <<EOF
     }
     dap.configurations.c = dap.configurations.cpp
 
+    ----------------------------------- JAVA-JDTLS -----------------------------------
+    require("transparent").setup({
+        enable = true, -- boolean: enable transparent
+        extra_groups = { -- table/string: additional groups that should be cleared
+            "BufferLineTabClose",
+            "BufferlineBufferSelected",
+            "BufferLineFill",
+            "BufferLineBackground",
+            "BufferLineSeparator",
+            "BufferLineIndicatorSelected",
+        },
+        exclude = {}, -- table: groups you don't want to clear
+    })
 EOF

@@ -1,4 +1,4 @@
-set guicursor=i:block
+" set guicursor=i:block
 set nu
 set nohlsearch
 set tabstop=4 softtabstop=4
@@ -25,7 +25,7 @@ else
 
     colorscheme tokyonight-moon
 
-    set guifont=Hack\ Regular\ Nerd\ Font\ Complete\ 10
+    set guifont=Hack\ Regular\ Nerd\ Font\ Complete\
 
     " atalhos
     let mapleader = " "
