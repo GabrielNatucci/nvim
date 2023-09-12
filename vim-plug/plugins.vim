@@ -4,7 +4,6 @@ call plug#begin()
     Plug 'LunarVim/lunar.nvim'
     Plug 'projekt0n/github-nvim-theme'
     Plug 'joshdick/onedark.vim'
-    Plug 'xiyaowong/nvim-transparent'
 
     " auto pairs
     Plug 'jiangmiao/auto-pairs'
@@ -399,18 +398,4 @@ lua <<EOF
     -- }
 
     -- require('jdtls').start_or_attach(config)
-
-    ----------------------------------- TRANSPARENT -----------------------------------
-    require("transparent").setup({
-        enable = true, -- boolean: enable transparent
-        extra_groups = { -- table/string: additional groups that should be cleared
-            "BufferLineTabClose",
-            "BufferlineBufferSelected",
-            "BufferLineFill",
-            "BufferLineBackground",
-            "BufferLineSeparator",
-            "BufferLineIndicatorSelected",
-        },
-        exclude = {}, -- table: groups you don't want to clear
-    })
 EOF
